@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html style="background-image: url({{ url_for('static', filename='img/background.jpg') }}); background-repeat: no-repeat; background-size: cover;">
+<head>
+    <title>Ferme en folie - Détails de l'Animal</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .feed-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .feed-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Détails de l'Animal</h1>
+        <table>
+            <tr>
+                <th>Nom</th>
+                <td>{{ animal.name }}</td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td>{{ animal.get_type_name() }}</td>
+            </tr>
+            <tr>
+                <th>Âge</th>
+                <td>{{ animal.age }}</td>
+            </tr>
+            <tr>
+                <th>Portion(s) mangée(s)</th>
+                <td>{{ animal.portions }}</td>
+            </tr>
+            <!-- Ajoutez d'autres informations de l'animal ici -->
+
+        </table>
+
+        <a href="/feed/{{ animal.id }}" class="feed-button">Donner à manger</a>
+    </div>
+</body>
+</html>

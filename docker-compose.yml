@@ -1,0 +1,166 @@
+version: "3.3"
+volumes:
+  mysql-data:
+services:
+  ferme_en_folie:
+    container_name: ferme-en-folie
+    ports:
+      - "5000:5000"
+    build:
+      context: ./application/FermeEnFolie
+      dockerfile: Dockerfile
+    image: ferme-en-folie:latest
+    environment:
+      - DATABASE_URL=mysql://root:root@mariadb:3306/ferme-en-folie
+      - FEEDFARMHUB_URL=http://feed-farm-hub:5000
+      - OTEL_SERVICE_NAME=ferme-en-folie
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317/v1/traces
+      - OTEL_METRICS_EXPORTER=none
+    command: "opentelemetry-instrument python3 run.py"
+  mariadb:
+    image: 'mariadb:latest'
+    container_name: mariadb
+    restart: on-failure
+    environment:
+      - "MYSQL_USER=admin"
+      - "MYSQL_PASSWORD=admin"
+      - "MYSQL_DATABASE=ferme-en-folie"
+      - "MYSQL_ROOT_PASSWORD=root"
+    volumes:
+      - mysql-data:/var/lib/mysql/
+    healthcheck:
+        test: [ "CMD", "healthcheck.sh", "--connect" ]
+        interval: 2s
+        timeout: 1s
+        retries: 20
+    ports:
+      - 3306:3306
+  ani-diet:
+    container_name: ani-diet
+    ports:
+      - "5001:5000"
+    build:
+      context: ./application/AniDiet
+      dockerfile: Dockerfile
+    image: ani-diet:latest
+    environment:
+      - OTEL_SERVICE_NAME=ani-diet
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317/v1/traces
+      - OTEL_METRICS_EXPORTER=none
+    command: "opentelemetry-instrument python3 run.py"
+  food-vault:
+    container_name: food-vault
+    ports:
+      - "5002:5000"
+    build:
+      context: ./application/FoodVault
+      dockerfile: Dockerfile
+    image: food-vault:latest
+    environment:
+      - OTEL_SERVICE_NAME=food-vault
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317/v1/traces
+      - OTEL_METRICS_EXPORTER=none
+    command: "opentelemetry-instrument python3 run.py"
+  portion-pro:
+    container_name: portion-pro
+    ports:
+      - "5003:5000"
+    build:
+      context: ./application/PortionPro
+      dockerfile: Dockerfile
+    image: portion-pro:latest
+    environment:
+      - OTEL_SERVICE_NAME=portion-pro
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317/v1/traces
+      - OTEL_METRICS_EXPORTER=none
+    command: "opentelemetry-instrument python3 run.py"
+  feed-farm-hub:
+    container_name: feed-farm-hub
+    ports:
+      - "5004:5000"
+    build:
+      context: ./application/FeedFarmHub
+      dockerfile: Dockerfile
+    image: feed-farm-hub:latest
+    environment:
+      - OTEL_SERVICE_NAME=feed-farm-hub
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317/v1/traces
+      - OTEL_METRICS_EXPORTER=none
+      - ANIDIET_URL=http://ani-diet:5000
+      - FOODVAULT_URL=http://food-vault:5000
+      - PORTIONPRO_URL=http://portion-pro:5000
+    command: "opentelemetry-instrument python3 run.py"
+############################## observability
+  promtail:
+    image:  grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./observability/promtail/promtail.yml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment: 
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_NAME: "Main Org."
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_BASIC_ENABLED: "false"
+      GF_AUTH_PROXY_ENABLED: "true"
+    volumes:
+      - ./observability/grafana/:/etc/grafana/provisioning/:z
+  cadvisor:
+    image: 'gcr.io/cadvisor/cadvisor'
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - "/dev/kmsg:/dev/kmsg"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - 8080:8080
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command: 
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc' 
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 9100:9100
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./observability/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    restart: always
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: on-failure
+    ports:
+      - "16686:16686"

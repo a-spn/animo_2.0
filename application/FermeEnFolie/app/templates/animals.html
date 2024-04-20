@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html style="background-image: url({{ url_for('static', filename='img/background.jpg')}}); background-repeat: no-repeat; background-size: cover;">
+<head>
+    <title>Ferme en folie</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.2); /* Couleur de fond de la carte blanche */
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .pagination {
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 0 10px;
+        }
+
+        /* Style pour le bouton "Ajouter un animal" */
+        .add-button {
+            display: block; /* Affiche le bouton comme un élément de bloc (sous le titre) */
+            margin: 20px auto; /* Centre le bouton horizontalement */
+            background-color: #007BFF; /* Couleur de fond du bouton */
+            color: #fff; /* Couleur du texte du bouton */
+            padding: 10px 20px; /* Espacement interne du bouton */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px; /* Taille de la police agrandie */
+            text-align: center; /* Centre le texte horizontalement */
+            cursor: pointer;
+            transition: background-color 0.3s; /* Transition de couleur au survol */
+        }
+
+        /* Style au survol du bouton */
+        .add-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Style pour le bouton "En savoir plus" */
+        .details-button {
+            background-color: #007BFF; /* Couleur de fond du bouton */
+            color: #fff; /* Couleur du texte du bouton */
+            padding: 5px 10px; /* Espacement interne du bouton */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px; /* Taille de la police */
+            text-align: center; /* Centre le texte horizontalement */
+            cursor: pointer;
+            transition: background-color 0.3s; /* Transition de couleur au survol */
+        }
+
+        /* Style au survol du bouton "En savoir plus" */
+        .details-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Liste des Animaux</h1>
+        <a href="/add_animal" class="add-button">+ Ajouter un animal</a> 
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Âge</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for animal in animals %}
+                    <tr>
+                        <td>{{ animal.name }}</td>
+                        <td>{{ animal.get_type_name() }}</td>
+                        <td>{{ animal.age }}</td>
+                        <td><a href="/animal/{{ animal.id }}" class="details-button">détails </a></td> <!-- Bouton "En savoir plus" avec lien vers "/animal/<id>" -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if total_animals > per_page %}
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}">Précédent</a>
+                {% endif %}
+                
+                {% if page * per_page < total_animals %}
+                    <a href="?page={{ page + 1 }}">Suivant</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

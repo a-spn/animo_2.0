@@ -1,0 +1,6 @@
+flask===3.0.0
+waitress===2.1.2
+opentelemetry-distro==0.41b0
+opentelemetry-exporter-otlp==1.20.0
+opentelemetry-instrumentation-flask==0.41b0
+prometheus-flask-exporter==0.23.0

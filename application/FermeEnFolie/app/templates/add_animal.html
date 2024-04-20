@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html style="background-image: url({{ url_for('static', filename='img/background.jpg') }} ); background-repeat: no-repeat; background-size: cover;">
+<head>
+    <title>Ferme en folie</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.2); /* Couleur de fond de la carte blanche */
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 400px; /* Largeur maximale de la carte */
+            margin: 20px; /* Espacement égal à gauche et à droite de la carte */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .alert {
+            background-color: #f8d7da; /* Couleur de l'alerte en cas d'erreur */
+            color: #721c24; /* Couleur du texte de l'alerte */
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            text-align: center;
+            display: flex;
+            flex-direction: column; /* Afficher les éléments dans une colonne */
+            align-items: center;
+        }
+
+        /* Style pour le conteneur des champs d'entrée */
+        .input-container {
+            width: 80%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: row; /* Afficher les éléments dans une ligne */
+            align-items: center;
+        }
+
+        /* Style pour les labels */
+        label {
+            font-weight: bold;
+            padding-right: 10px;
+            width: 33%; /* Largeur fixe pour les labels */
+            text-align: left; /* Aligner le texte à gauche */
+        }
+
+        /* Style pour tous les champs d'entrée pour qu'ils aient la même largeur */
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%; /* Largeur pour les champs d'entrée */
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        /* Style pour le bouton Ajouter l'animal */
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Ajouter un Animal</h1>
+        {% if error_message %}
+        <div class="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        <form method="POST" action="/add_animal">
+            <div class="input-container">
+                <label for="name">Nom :</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="input-container">
+                <label for="type">Type :</label>
+                <select id="type" name="type" required>
+                    {% for item in animal_list %}
+                        <option value="{{item}}">{{item}}</option>
+    
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-container">
+                <label for="age">Âge :</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+
+            <input type="submit" value="Ajouter l'animal">
+        </form>
+    </div>
+</body>
+</html>

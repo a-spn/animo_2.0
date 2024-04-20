@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html style="background-image: url({{ url_for('static', filename='img/background.jpg') }}); background-repeat: no-repeat; background-size: cover;">
+<head>
+    <title>Ferme en folie - Confirmation du Nourrissage</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .croquettes {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Bilan du repas : </h1>
+        <p class="message">{{ message }}</p>
+        {% if portions!=0 %}
+        <p class="croquettes">{{ portions }} portion(s) de {{food}} donnée(s)</p>
+        {% endif %}
+        <a href="/animal/{{ animal_id }}" class="back-button">Retour à la fiche de l'animal</a>
+    </div>
+</body>
+</html>
